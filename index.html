@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Implementation Science & MEL Cheatsheet — A Living Reference</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #14181F;
+    --navy-mid: #1C212B;
+    --navy-light: #262D3A;
+    --slate-blue: #6B8CAE;
+    --slate-blue-light: #9BB8D3;
+    --cream: #F5F4F0;
+    --slate-light: #828A99;
+    --white: #FFFFFF;
+    --amber: #D4A05C;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body { font-family: 'Inter', sans-serif; background: var(--navy); color: var(--cream); min-height: 100vh; }
+
+  header {
+    background: var(--navy); border-bottom: 1px solid rgba(107,140,174,0.2); padding: 0 2rem;
+    position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; height: 64px;
+  }
+
+  .logo { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 700; letter-spacing: 0.04em; color: var(--cream); display: flex; align-items: center; gap: 10px; }
+  .logo-dot { width: 8px; height: 8px; background: var(--slate-blue); border-radius: 50%; display: inline-block; }
+  .header-right { display: flex; align-items: center; gap: 1.5rem; }
+  .notebook-tag {
+    font-size: 0.72rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate-blue-light);
+    border: 1px solid rgba(107,140,174,0.4); padding: 3px 10px; border-radius: 2px;
+  }
+  .last-updated { font-size: 0.72rem; color: var(--slate-light); letter-spacing: 0.02em; }
+
+  .hero { padding: 4.5rem 2rem 3rem; max-width: 900px; margin: 0 auto; text-align: center; }
+  .hero-eyebrow { font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--slate-blue-light); margin-bottom: 1.5rem; font-weight: 500; }
+  .hero h1 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 700; line-height: 1.15; color: var(--cream); margin-bottom: 1.25rem; }
+  .hero h1 em { font-style: normal; color: var(--slate-blue-light); }
+  .hero p { font-size: 1.02rem; line-height: 1.7; color: rgba(245,244,240,0.62); max-width: 620px; margin: 0 auto; }
+
+  /* Why-different callout — the signature visual element */
+  .why-different {
+    max-width: 900px; margin: 2.5rem auto 0; padding: 1.75rem 2rem; background: rgba(107,140,174,0.06);
+    border: 1px solid rgba(107,140,174,0.25); border-radius: 4px;
+  }
+  .why-different-label {
+    font-family: 'Space Grotesk', sans-serif; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--slate-blue-light); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.6rem;
+  }
+  .why-different-label::before { content: ''; width: 16px; height: 1px; background: var(--slate-blue); }
+  .why-different ul { padding-left: 1.1rem; }
+  .why-different li { font-size: 0.86rem; line-height: 1.7; color: rgba(245,244,240,0.7); margin-bottom: 0.55rem; }
+  .why-different li:last-child { margin-bottom: 0; }
+  .why-different strong { color: var(--cream); font-weight: 600; }
+
+  .cat-nav { display: flex; gap: 0.5rem; padding: 2rem 2rem 1.5rem; max-width: 1200px; margin: 0 auto; flex-wrap: wrap; align-items: center; }
+  .cat-btn {
+    font-family: 'Space Grotesk', sans-serif; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.04em; padding: 8px 18px;
+    border: 1px solid rgba(245,244,240,0.15); border-radius: 3px; background: transparent; color: rgba(245,244,240,0.55);
+    cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .cat-btn:hover { border-color: var(--slate-blue-light); color: var(--slate-blue-light); }
+  .cat-btn.active { background: var(--slate-blue); border-color: var(--slate-blue); color: var(--navy); }
+  .search-wrap { margin-left: auto; position: relative; }
+  .search-input {
+    background: rgba(245,244,240,0.06); border: 1px solid rgba(245,244,240,0.12); border-radius: 3px;
+    padding: 8px 14px 8px 36px; color: var(--cream); font-family: 'Inter', sans-serif; font-size: 0.82rem; width: 220px;
+    outline: none; transition: border-color 0.2s;
+  }
+  .search-input::placeholder { color: var(--slate-light); }
+  .search-input:focus { border-color: var(--slate-blue); }
+  .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--slate-light); font-size: 0.85rem; }
+
+  .main { max-width: 1200px; margin: 0 auto; padding: 1rem 2rem 5rem; }
+
+  /* Cheatsheet cards — denser than the practice-mode notebooks, no expand/collapse, all info visible */
+  .fw-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 1px; background: rgba(245,244,240,0.06); border: 1px solid rgba(245,244,240,0.06); margin-bottom: 3rem; }
+
+  .fw-card { background: var(--navy-mid); padding: 1.75rem; position: relative; }
+  .fw-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--slate-blue); }
+
+  .fw-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.5rem; }
+  .fw-type { font-size: 0.66rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.6; }
+  .start-badge { font-family: 'Space Grotesk', sans-serif; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--navy); background: var(--slate-blue-light); padding: 2px 8px; border-radius: 2px; display: inline-block; }
+  .fw-year { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: var(--slate-light); white-space: nowrap; }
+  .fw-name { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--cream); margin-bottom: 0.5rem; line-height: 1.3; }
+  .fw-short { font-size: 0.82rem; color: rgba(245,244,240,0.65); line-height: 1.55; margin-bottom: 1.1rem; }
+
+  .fw-section { margin-bottom: 1rem; }
+  .fw-section:last-child { margin-bottom: 0; }
+  .fw-section-label {
+    font-family: 'Space Grotesk', sans-serif; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--slate-blue-light); margin-bottom: 0.45rem;
+  }
+  .fw-section p, .fw-section li { font-size: 0.81rem; line-height: 1.6; color: rgba(245,244,240,0.72); }
+  .fw-section ul { padding-left: 1.1rem; }
+  .fw-section li { margin-bottom: 0.25rem; }
+
+  .construct-pills { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .construct-pill {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 500; padding: 3px 9px; border-radius: 3px;
+    background: rgba(107,140,174,0.12); color: var(--slate-blue-light); border: 1px solid rgba(107,140,174,0.25);
+  }
+
+  .fw-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 1.1rem; padding-top: 1.1rem; border-top: 1px solid rgba(245,244,240,0.07); }
+  .tag { font-size: 0.67rem; font-weight: 500; padding: 2px 8px; border-radius: 2px; background: rgba(245,244,240,0.06); color: rgba(245,244,240,0.45); letter-spacing: 0.03em; }
+
+  .section-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; margin-top: 2.5rem; }
+  .section-label { font-family: 'Space Grotesk', sans-serif; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; padding: 3px 10px; border-radius: 2px; background: rgba(107,140,174,0.15); color: var(--slate-blue-light); }
+  .section-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 600; color: var(--cream); }
+  .section-line { flex: 1; height: 1px; background: rgba(245,244,240,0.08); }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 700px) {
+    .fw-grid { grid-template-columns: 1fr; }
+  }
+
+  footer { border-top: 1px solid rgba(245,244,240,0.07); padding: 2.5rem 2rem; text-align: center; font-size: 0.8rem; color: var(--slate-light); max-width: 1200px; margin: 0 auto; }
+  footer a { color: var(--slate-blue-light); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span class="logo-dot"></span>Implementation Science & MEL</div>
+  <div class="header-right">
+    <span class="notebook-tag">Living Cheatsheet</span>
+    <span class="last-updated">Last updated June 2026</span>
+  </div>
+</header>
+
+<div class="hero">
+  <p class="hero-eyebrow">A Reference, Not a Practice Notebook</p>
+  <h1>How do we know it still works<br>once <em>we're not in the room?</em></h1>
+  <p>The frameworks academic public health, international development, and learning health systems use to ask whether something that worked once will keep working when scaled, handed off, or run by someone else.</p>
+</div>
+
+<div class="why-different">
+  <div class="why-different-label">Why This Notebook Looks Different From the Others</div>
+  <ul>
+    <li><strong>No AI practice mode.</strong> These fields value precision, citation, and peer-reviewed nuance over rehearsal — a fabricated scenario would do this discipline a disservice. This is a cheatsheet for recognising and correctly applying the right framework, not a sandbox for practicing it.</li>
+    <li><strong>Built for a different reader.</strong> Consulting frameworks assume one person, fast, under deadline, persuading a client. These assume a multi-year program, evaluated by people who weren't there at the start, accountable to a funder who wasn't either.</li>
+    <li><strong>They cluster late.</strong> Almost everything here lives at the <em>Prove</em> and <em>Scale</em> end of a project, not the <em>Diagnose</em> end — see <a href="#" style="color:var(--slate-blue-light)" onclick="return false;">the Journey map on the notebook hub</a> for how this set slots in against the other three notebooks.</li>
+    <li><strong>Acronym-dense on purpose.</strong> This vocabulary was refined to survive peer review, not a two-week training. Density here signals precision, not inaccessibility — each entry below unpacks the acronym plainly.</li>
+    <li><strong>Start with CFIR if you're new to this field.</strong> It's the most comprehensive and most-cited determinant framework, and most other frameworks here either narrow it (i-PARIHS, NPT) or sit downstream of it (RE-AIM, Realist Evaluation). Read it first, then branch based on what you're actually trying to do — diagnose barriers (stay in Determinant), judge success (go to Evaluation), or move evidence into routine practice (go to Process).</li>
+  </ul>
+</div>
+
+<div class="cat-nav">
+  <button class="cat-btn active" onclick="filterCat('all', this)">All Frameworks</button>
+  <button class="cat-btn" onclick="filterCat('determinant', this)">Determinant Frameworks</button>
+  <button class="cat-btn" onclick="filterCat('evaluation', this)">Evaluation Frameworks</button>
+  <button class="cat-btn" onclick="filterCat('process', this)">Process Frameworks</button>
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input type="text" class="search-input" placeholder="Search frameworks..." oninput="searchFrameworks(this.value)">
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ═══════════════════════════════
+       DETERMINANT FRAMEWORKS
+       (diagnose WHY implementation succeeds or fails)
+  ═══════════════════════════════ -->
+  <div class="section-header" data-cat="determinant">
+    <span class="section-label">Determinant</span>
+    <span class="section-title">Determinant Frameworks — what helps or blocks implementation</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="fw-grid" data-cat="determinant">
+
+    <!-- CFIR -->
+    <div class="fw-card" data-name="CFIR Consolidated Framework Implementation Research" data-tags="determinants domains constructs barriers facilitators">
+      <div class="fw-card-head">
+        <span class="fw-type">Determinant Framework</span>
+        <span class="fw-year">Damschroder et al., 2009 · updated 2022</span>
+      </div>
+      <span class="start-badge" style="margin-bottom: 0.6rem;">Start Here</span>
+      <div class="fw-name">CFIR — Consolidated Framework for Implementation Research</div>
+      <div class="fw-short">A comprehensive, "meta-theoretical" taxonomy of everything that can help or hinder implementation, synthesised from 19 existing theories.</div>
+      <div class="fw-section">
+        <div class="fw-section-label">Five Domains</div>
+        <div class="construct-pills">
+          <span class="construct-pill">Innovation</span>
+          <span class="construct-pill">Outer Setting</span>
+          <span class="construct-pill">Inner Setting</span>
+          <span class="construct-pill">Individuals</span>
+          <span class="construct-pill">Implementation Process</span>
+        </div>
+      </div>
+      <div class="fw-section">
+        <div class="fw-section-label">What it's actually for</div>
+        <p>A diagnostic checklist of ~40 constructs (e.g. evidence strength, organisational culture, leadership engagement) used to identify barriers and facilitators before, during, or after implementation — formative, process, or outcome evaluation.</p>
+      </div>
+      <div class="fw-section">
+        <div class="fw-section-label">Use it when</div>
+        <ul>
+          <li>You need a comprehensive scan of "what could go wrong" before rolling something out</li>
+          <li>Comparing why the same intervention succeeded at one site and failed at another</li>
+        </ul>
+      </div>
+      <div class="fw-section">
+        <div class="fw-section-label">Caveat</div>
+        <p>Comprehensive to the point of overwhelming — most teams select a relevant subset of constructs rather than applying all ~40. Not a process model; it tells you <em>what</em> matters, not <em>in what order</em> to act.</p>
+      </div>
+      <div class="fw-tags"><span class="tag">Health Services</span><span class="tag">Barriers & Facilitators</span><span class="tag">Most Cited</span></div>
+    </div>
+
+    <!-- i-PARIHS -->
+    <div class="fw-card" data-name="i-PARIHS Integrated Promoting Action Research Implementation Health Services" data-tags="facilitation context recipients innovation">
+      <div class="fw-card-head">
+        <span class="fw-type">Determinant Framework</span>
+        <span class="fw-year">Harvey & Kitson, 2015/2016</span>
+      </div>
+      <div class="fw-name">i-PARIHS — Integrated PARIHS</div>
+      <div class="fw-short">Successful implementation = active facilitation of an innovation with its recipients, in their context. Facilitation is the "active ingredient" — not a passive backdrop.</div>
+      <div class="fw-section">
+        <div class="fw-section-label">Four Core Constructs</div>
+        <div class="construct-pills">
+          <span class="construct-pill">Innovation</span>
+          <span class="construct-pill">Recipients</span>
+          <span class="construct-pill">Context</span>
+          <span class="construct-pill">Facilitation</span>
+        </div>
+      </div>
+      <div class="fw-section">
+        <div class="fw-section-label">What it's actually for</div>
+        <p>Unlike CFIR's flat checklist, i-PARIHS centres on <em>facilitation</em> — the specific role and skillset of the person enabling change — as the mechanism that integrates the other three constructs. It distinguishes novice, experienced, and expert facilitator roles.</p>
+      </div>
+      <div class="fw-section">
+        <div class="fw-section-label">Use it when</div>
+        <ul>
+          <li>The implementation depends heavily on a designated change agent or facilitator role</li>
+          <li>You want to plan facilitation strategy, not just catalogue barriers</li>
+        </ul>
+      </div>
+      <div class="fw-section">
+        <div class="fw-section-label">Caveat</div>
+        <p>Originated in nursing/health services — adapting "facilitation" language to non-clinical settings takes some translation. Often used retrospectively as an organising device rather than prospectively to design facilitation, which limits its planning power.</p>
+      </div>
+      <div class="fw-tags"><span class="tag">Nursing Origin</span><span class="tag">Facilitation</span><span class="tag">Evidence-Based Practice</span></div>
+    </div>
+
+    <!-- Normalization Process Theory -->
+    <div class="fw-card" data-name="Normalization Process Theory NPT" data-tags="embedding routine sustainability sense making">
+      <div class="fw-card-head">
+        <span class="fw-type">Determinant Framework</span>
+        <span class="fw-year">May & Finch, 2009</span>
+      </div>
+      <div class="fw-name">Normalization Process Theory (NPT)</div>
+      <div class="fw-short">Explains how a new practice becomes routine, taken-for-granted work — the mechanism by which something stops being "the new thing" and starts being "just how we do it."</div>
+      <div class="fw-section">
+        <div class="fw-section-label">Four Core Constructs</div>
+        <div class="construct-pills">
+          <span class="construct-pill">Coherence</span>
+          <span class="construct-pill">Cognitive Participation</span>
+          <span class="construct-pill">Collective Action</span>
+          <span class="construct-pill">Reflexive Monitoring</span>
+        </div>
+      </div>
+      <div class="fw-section">
+        <div class="fw-section-label">What it's actually for</div>
+        <p>Coherence asks if people understand and make sense of the new practice. Cognitive participation asks if they buy in and commit. Collective action asks if the work actually gets done in practice. Reflexive monitoring asks if people evaluate and adapt it over time. All four must function for normalization to occur.</p>
+      </div>
+      <div class="fw-section">
+        <div class="fw-section-label">Use it when</div>
+        <ul>
+          <li>You're past initial adoption and trying to understand why something hasn't stuck</li>
+          <li>You need a theory of <em>embedding</em>, not just initial uptake</li>
+        </ul>
+      </div>
+      <div class="fw-section">
+        <div class="fw-section-label">Caveat</div>
+        <p>Explanatory, not prescriptive — NPT tells you why normalization succeeded or failed, but doesn't hand you a ready-made strategy. Most useful paired with a process framework like i-PARIHS or KTA.</p>
+      </div>
+      <div class="fw-tags"><span class="tag">Sociology of Practice</span><span class="tag">Sustainability</span><span class="tag">Embedding</span></div>
+    </div>
+
+  </div><!-- /fw-grid determinant -->
+
+
+  <!-- ═══════════════════════════════
+       EVALUATION FRAMEWORKS
+       (assess whether & why it worked)
+  ═══════════════════════════════ -->
+  <div class="section-header" data-cat="evaluation">
+    <span class="section-label">Evaluation</span>
+    <span class="section-title">Evaluation Frameworks — assessing whether and why it worked</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="fw-grid" data-cat="evaluation">
+
+    <!-- RE-AIM -->
+    <div class="fw-card" data-name="RE-AIM Reach Effectiveness Adoption Implementation Maintenance" data-tags="public health real world translation external validity">
+      <div class="fw-card-head">
+        <span class="fw-type">Evaluation Framework</span>
+        <span class="fw-year">Glasgow et al., 1999 · 20-year review 2019</span>
+      </div>
+      <div class="fw-name">RE-AIM</div>
+      <div class="fw-short">Five dimensions that together measure the real-world, population-level impact of a program — corrective to research that only ever reports whether the intervention worked in ideal trial conditions.</div>
+      <div class="fw-section">
+        <div class="fw-section-label">Five Dimensions</div>
+        <div class="construct-pills">
+          <span class="construct-pill">Reach</span>
+          <span class="construct-pill">Effectiveness</span>
+          <span class="construct-pill">Adoption</span>
+          <span class="construct-pill">Implementation</span>
+          <span class="construct-pill">Maintenance</span>
+        </div>
+      </div>
+      <div class="fw-section">
+        <div class="fw-section-label">What it's actually for</div>
+        <p>Reach and Effectiveness operate at the individual/participant level. Adoption and Implementation operate at the staff/setting/system level. Maintenance applies to both — sustained delivery <em>and</em> sustained effectiveness over time. A program can excel at Effectiveness in a trial and still fail at population impact if Reach or Adoption are weak.</p>
+      </div>
+      <div class="fw-section">
+        <div class="fw-section-label">Use it when</div>
+        <ul>
+          <li>Reporting or designing a public health program meant to scale beyond a controlled pilot</li>
+          <li>You need to distinguish "did it work" from "did it actually reach and stick with real-world settings"</li>
+        </ul>
+      </div>
+      <div class="fw-section">
+        <div class="fw-section-label">Caveat</div>
+        <p>In practice, Reach is the dimension most often reported weakly or not at all — the 20-year review found it shows the largest gap between stated importance and actual reporting. Iterative RE-AIM (repeated scoring over time) is increasingly preferred over a single static assessment.</p>
+      </div>
+      <div class="fw-tags"><span class="tag">Public Health</span><span class="tag">External Validity</span><span class="tag">Population Impact</span></div>
+    </div>
+
+    <!-- Realist Evaluation -->
+    <div class="fw-card" data-name="Realist Evaluation CMO Context Mechanism Outcome Pawson Tilley" data-tags="CMO causal configuration what works for whom">
+      <div class="fw-card-head">
+        <span class="fw-type">Evaluation Framework</span>
+        <span class="fw-year">Pawson & Tilley, 1997</span>
+      </div>
+      <div class="fw-name">Realist Evaluation (CMO Configuration)</div>
+      <div class="fw-short">Rejects "does it work?" as the wrong question. Asks instead: what works, for whom, in what circumstances, and why.</div>
+      <div class="fw-section">
+        <div class="fw-section-label">Core Logic</div>
+        <div class="construct-pills">
+          <span class="construct-pill">Context</span>
+          <span class="construct-pill">Mechanism</span>
+          <span class="construct-pill">Outcome</span>
+        </div>
+      </div>
+      <div class="fw-section">
+        <div class="fw-section-label">What it's actually for</div>
+        <p>A CMO statement reads: "in this context, this mechanism fired for these people, generating this outcome." The same intervention can produce different outcomes in different contexts because different underlying mechanisms are triggered — realist evaluation tests and refines these CMO configurations against empirical data rather than asking for a single yes/no verdict on effectiveness.</p>
+      </div>
+      <div class="fw-section">
+        <div class="fw-section-label">Use it when</div>
+        <ul>
+          <li>The same program produced wildly different results across sites and you need to explain why, not just report the average</li>
+          <li>You suspect "what works" genuinely depends on who and where, not just whether the program existed</li>
+        </ul>
+      </div>
+      <div class="fw-section">
+        <div class="fw-section-label">Caveat</div>
+        <p>"Mechanism" is notoriously inconsistently defined across realist studies — nearly half of published studies don't explicitly define it. Method-neutral by design (qualitative or quantitative data both fit), which means rigour depends heavily on the evaluator's discipline, not the framework itself.</p>
+      </div>
+      <div class="fw-tags"><span class="tag">Critical Realism</span><span class="tag">Theory-Driven</span><span class="tag">Complex Interventions</span></div>
+    </div>
+
+    <!-- DAC Criteria -->
+    <div class="fw-card" data-name="OECD DAC Criteria Relevance Coherence Effectiveness Efficiency Impact Sustainability" data-tags="international development donor accountability six criteria">
+      <div class="fw-card-head">
+        <span class="fw-type">Evaluation Framework</span>
+        <span class="fw-year">OECD/DAC, early 2000s · revised 2019</span>
+      </div>
+      <div class="fw-name">OECD-DAC Evaluation Criteria</div>
+      <div class="fw-short">The standard six-lens framework for evaluating development and humanitarian interventions, used globally by donors and multilaterals.</div>
+      <div class="fw-section">
+        <div class="fw-section-label">Six Criteria</div>
+        <div class="construct-pills">
+          <span class="construct-pill">Relevance</span>
+          <span class="construct-pill">Coherence</span>
+          <span class="construct-pill">Effectiveness</span>
+          <span class="construct-pill">Efficiency</span>
+          <span class="construct-pill">Impact</span>
+          <span class="construct-pill">Sustainability</span>
+        </div>
+      </div>
+      <div class="fw-section">
+        <div class="fw-section-label">What it's actually for</div>
+        <p>Relevance and Coherence assess fit with needs and other actors' efforts. Effectiveness and Efficiency assess delivery. Impact and Sustainability assess longer-term and lasting change. Coherence was added in the 2019 revision specifically to capture how an intervention interacts with other policies and actors — a systems-thinking addition.</p>
+      </div>
+      <div class="fw-section">
+        <div class="fw-section-label">Use it when</div>
+        <ul>
+          <li>Evaluating a donor-funded development, aid, or humanitarian program against an internationally recognised standard</li>
+          <li>You need a common evaluation language across multiple funders or implementing partners</li>
+        </ul>
+      </div>
+      <div class="fw-section">
+        <div class="fw-section-label">Caveat</div>
+        <p>OECD itself warns against mechanical "tick every box" application regardless of relevance. Increasingly criticised for Eurocentric origins and donor-centric framing — a live debate in the field about whose standards of "relevance" and "value" the criteria actually encode.</p>
+      </div>
+      <div class="fw-tags"><span class="tag">International Development</span><span class="tag">Donor Standard</span><span class="tag">OECD</span></div>
+    </div>
+
+    <!-- Developmental Evaluation -->
+    <div class="fw-card" data-name="Developmental Evaluation Patton complex adaptive innovation" data-tags="emergent complex adaptive real time learning innovation">
+      <div class="fw-card-head">
+        <span class="fw-type">Evaluation Framework</span>
+        <span class="fw-year">Patton, 2011</span>
+      </div>
+      <div class="fw-name">Developmental Evaluation</div>
+      <div class="fw-short">For when the program itself is still being invented. Evaluation embedded in real time as part of the innovation process, not bolted on at the end to judge a fixed design.</div>
+      <div class="fw-section">
+        <div class="fw-section-label">Core Premise</div>
+        <p>Most evaluation assumes a stable program design you're testing against fixed criteria. Developmental Evaluation assumes the opposite — the intervention is still emerging, adapting, and being co-designed with the evaluator feeding real-time data back into the design process itself.</p>
+      </div>
+      <div class="fw-section">
+        <div class="fw-section-label">Use it when</div>
+        <ul>
+          <li>A genuinely novel intervention in a complex, unpredictable system (not a known model being rolled out)</li>
+          <li>The team needs to adapt the program design mid-stream based on what's being learned, not just measure a fixed thing</li>
+        </ul>
+      </div>
+      <div class="fw-section">
+        <div class="fw-section-label">Caveat</div>
+        <p>Easy to misuse as an excuse for poor planning rather than genuine complexity — "developmental" should describe the problem's nature, not a justification for skipping rigour. Harder to satisfy traditional funder reporting requirements that expect a fixed logic model upfront.</p>
+      </div>
+      <div class="fw-tags"><span class="tag">Patton</span><span class="tag">Complex Systems</span><span class="tag">Emergent Design</span></div>
+    </div>
+
+  </div><!-- /fw-grid evaluation -->
+
+
+  <!-- ═══════════════════════════════
+       PROCESS FRAMEWORKS
+       (the sequence/cycle of moving evidence into action)
+  ═══════════════════════════════ -->
+  <div class="section-header" data-cat="process">
+    <span class="section-label">Process</span>
+    <span class="section-title">Process Frameworks — the cycle of moving evidence into action</span>
+    <div class="section-line"></div>
+  </div>
+
+  <div class="fw-grid" data-cat="process">
+
+    <!-- Knowledge to Action -->
+    <div class="fw-card" data-name="Knowledge to Action KTA Framework Graham" data-tags="knowledge translation action cycle research uptake">
+      <div class="fw-card-head">
+        <span class="fw-type">Process Framework</span>
+        <span class="fw-year">Graham et al., 2006</span>
+      </div>
+      <div class="fw-name">Knowledge-to-Action (KTA) Framework</div>
+      <div class="fw-short">Models the full journey from raw research evidence to embedded practice — two linked components, not a single linear pipeline.</div>
+      <div class="fw-section">
+        <div class="fw-section-label">Two Components</div>
+        <div class="construct-pills">
+          <span class="construct-pill">Knowledge Creation (funnel)</span>
+          <span class="construct-pill">Action Cycle (7 stages)</span>
+        </div>
+      </div>
+      <div class="fw-section">
+        <div class="fw-section-label">What it's actually for</div>
+        <p>Knowledge Creation narrows raw inquiry → synthesis → user-friendly tools/products. The surrounding Action Cycle (identify problem → adapt knowledge to local context → assess barriers → select/tailor/implement interventions → monitor use → evaluate outcomes → sustain use) is explicitly iterative and non-sequential — you can enter or exit at any phase.</p>
+      </div>
+      <div class="fw-section">
+        <div class="fw-section-label">Use it when</div>
+        <ul>
+          <li>You're starting from a clear, already-synthesised evidence base (e.g. a clinical guideline) and need a structured path to embedding it in practice</li>
+          <li>Adopted by Canadian Institutes of Health Research (CIHR) and widely used as the default knowledge-translation map</li>
+        </ul>
+      </div>
+      <div class="fw-section">
+        <div class="fw-section-label">Caveat</div>
+        <p>Despite being highly cited, a systematic review found it's often cited as theoretical backing rather than genuinely operationalised step-by-step in practice — easy to reference, harder to actually run faithfully.</p>
+      </div>
+      <div class="fw-tags"><span class="tag">Canada / CIHR</span><span class="tag">Knowledge Translation</span><span class="tag">Iterative</span></div>
+    </div>
+
+  </div><!-- /fw-grid process -->
+
+</div><!-- /main -->
+
+<footer>
+  <p>A living cheatsheet. Last updated June 2026 · Part of a series alongside the Consulting Playbook, Health Innovation Playbook, and Impact Investing Playbook · <a href="https://github.com/bwtwong" target="_blank">GitHub ↗</a></p>
+  <p style="margin-top:0.5rem; font-size:0.72rem; opacity:0.6">Frameworks drawn from peer-reviewed implementation science and OECD/DAC development evaluation literature. This is a practitioner's reference, not a substitute for reading the primary sources cited beside each entry — always go to the original paper before applying a framework in real evaluation work.</p>
+</footer>
+
+<script>
+function filterCat(cat, btn) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.section-header, .fw-grid').forEach(el => {
+    if (cat === 'all') {
+      el.classList.remove('hidden');
+    } else {
+      el.classList.toggle('hidden', el.dataset.cat !== cat);
+    }
+  });
+}
+
+function searchFrameworks(query) {
+  const q = query.toLowerCase().trim();
+  if (q) {
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.section-header, .fw-grid').forEach(el => el.classList.remove('hidden'));
+  }
+  document.querySelectorAll('.fw-card').forEach(card => {
+    if (!q) { card.classList.remove('hidden'); return; }
+    const name = (card.dataset.name || '').toLowerCase();
+    const tags = (card.dataset.tags || '').toLowerCase();
+    const text = (card.innerText || '').toLowerCase();
+    card.classList.toggle('hidden', !name.includes(q) && !tags.includes(q) && !text.includes(q));
+  });
+}
+</script>
+</body>
+</html>
